@@ -11,20 +11,34 @@ use NX::Common qw( Debug Fatal Run RunOrFatal PrintOut ValueOr );
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
+    AbsPath
     OpenFileHandle
-    ReadFile
-    WriteFile
-    MoveFile
-    CopyFile
+    ReadFile  WriteFile
+    DeleteFile  MoveFile  CopyFile
     FindFreeFileName
     Symlink
     );
+
+use Cwd qw(abs_path);
 
 sub MoveFile(%)
 {
     my (%param) = @_;
     my ($source, $dest) = @param{qw(from to)};
     RunOrFatal(cmd => ['mv', $source, $dest]);
+}
+
+sub DeleteFile($)
+{
+    my ($file) = @_;
+    Debug(3, "Deleting: '", $file, "'");
+    unlink($file) || Fatal("Failed to delete '", $file, "': ", $!);
+}
+
+sub AbsPath($)
+{
+    my ($path) = @_;
+    return abs_path($path);
 }
 
 sub OpenFileHandle($$)
