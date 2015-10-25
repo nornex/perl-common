@@ -132,7 +132,7 @@ sub IsRoot()
 
 sub RequireRoot()
 {
-    if (IsRoot())
+    if (!IsRoot())
     {
         PrintOut("Root access is required, restarting script with sudo...");
         chdir($initial_working_dir);
@@ -157,7 +157,7 @@ sub Run(%)
     my ($cmd, $in, $working_dir) = @param{qw(cmd in working_dir)};
 
     if (!$cmd) { FATAL("Requires cmd parameter"); }
-    if (ref($cmd) ne 'ARRAY') { FATAL("The 'cmd' parameter, must be an array reference"); }
+    if (ref($cmd) ne 'ARRAY') { FATAL("The 'cmd' parameter must be an array reference"); }
 
     Debug(2, "Running: ", $cmd);
 
