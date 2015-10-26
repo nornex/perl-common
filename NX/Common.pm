@@ -9,7 +9,7 @@ package NX::Common;
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
-    CommonInit RequireRoot
+    CommonInit RequireRoot IsRoot
     Run RunOrFatal
     Debug PrintOut Fatal
     ValueOr
