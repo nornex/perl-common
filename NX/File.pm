@@ -16,10 +16,11 @@ our @EXPORT_OK = qw(
     ReadFile  WriteFile
     DeleteFile  MoveFile  CopyFile
     FindFreeFileName
-    Symlink
+    Symlink ReadSymlink
     );
 
 use Cwd qw(abs_path);
+use File::Basename qw(dirname);
 
 sub MoveFile(%)
 {
@@ -117,18 +118,70 @@ sub WriteFile(%)
     }
 }
 
+sub IsPathRelative($)
+{
+    my ($path) = @_;
+    return ($path =~ m{^\.}) ? 1 : 0;
+}
+
+sub ReadSymlink($)
+{
+    my ($file) = @_;
+    if (! (-l $file))
+    {
+        Fatal("Tried to read symlink, but its not a symlink: ", $file);
+    }
+
+    my $link = readlink($file);
+    if (IsPathRelative($link))
+    {
+        my $dir = dirname(AbsPath($file));
+        $link = $dir . '/' . $link;
+    }
+
+    return AbsPath($link);
+}
+
 sub Symlink(%)
 {
     my %param = @_;
-    my ($from, $to) = @param{qw(from to)};
+    my ($from, $to, $overwrite) = @param{qw(from to overwrite)};
 
-    if (-e $to)
+    if (-e $from)
     {
-        Fatal("Cannot symlink '", $from, "' -> '", $to, "': Destination already exists");
+        if (-l $from)
+        {
+            my $link = ReadSymlink($from);
+            Debug(4, "Link: ", $link);
+
+            if ($link eq AbsPath($to))
+            {
+                Debug(4, "Link already exists: ", $link);
+                return;
+            }
+            else
+            {
+                if ($overwrite)
+                {
+                    DeleteFile($from);
+                }
+                else
+                {
+                    Fatal(
+                        "Cannot symlink '", $from, "' -> '", $to, "': Symlink allready exists: '",
+                        $from, "' -> '", $link, "'"
+                    );
+                }
+            }
+        }
+        else
+        {
+            Fatal("Cannot symlink '", $from, "' -> '", $to, "': File/dir already exists at '", $from, "'");
+        }
     }
 
     Debug(5, "Creating symlink: '", $from, "' -> '", $to, "'");
-    if (!symlink($from, $to))
+    if (!symlink($to, $from))
     {
         Fatal("Symlink '", $from, "' -> '", $to, "' failed: ", ValueOr($!, "Unknown reason"));
     }
