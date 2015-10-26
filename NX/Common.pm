@@ -121,8 +121,8 @@ sub CommonInit()
 {
     $SIG{__DIE__} = sub { Carp::confess( @_ ) };
     $SIG{__WARN__} = sub { Carp::confess( @_ ) };
-    $SIG{INT} = sub { FATAL("Caught a SIGINT signal: $!"); };
-    $SIG{TERM} = sub { FATAL("Caught a SIGTERM signal: $!"); };
+    $SIG{INT} = sub { Fatal("Caught a SIGINT signal: $!"); };
+    $SIG{TERM} = sub { Fatal("Caught a SIGTERM signal: $!"); };
 }
 
 sub IsRoot()
